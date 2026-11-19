@@ -2,19 +2,20 @@
 
 ## 📌 Sobre o projeto
 
-O **AlertaCom-IA** é um projeto acadêmico desenvolvido para auxiliar na identificação de incidentes urbanos por meio de inteligência artificial e visão computacional.
+O **AlertaCom-IA** é um projeto acadêmico desenvolvido para auxiliar na identificação de incidentes urbanos utilizando inteligência artificial, visão computacional e IA generativa.
 
-A solução permite que o usuário envie uma fotografia de uma situação urbana, que será analisada por um modelo de inteligência artificial capaz de classificá-la em diferentes categorias.
+A aplicação permite que o usuário envie uma fotografia de uma situação urbana. O sistema analisa a imagem, identifica a categoria mais compatível e retorna orientações relacionadas ao incidente.
 
-O objetivo é demonstrar como tecnologias de visão computacional podem contribuir para o monitoramento de problemas urbanos.
+O objetivo é demonstrar como a inteligência artificial pode apoiar iniciativas de cidades inteligentes, contribuindo para a identificação e comunicação de problemas urbanos.
 
 ## 🎯 Objetivos
 
-- Identificar possíveis incidentes urbanos a partir de fotografias.
-- Classificar imagens utilizando inteligência artificial.
-- Disponibilizar uma API REST para envio e análise de imagens.
-- Demonstrar a aplicação prática de visão computacional.
-- Explorar as possibilidades e limitações de modelos de IA.
+- Identificar incidentes urbanos por meio de fotografias.
+- Classificar imagens utilizando visão computacional.
+- Integrar um modelo de IA generativa à aplicação.
+- Disponibilizar uma API REST para análise de imagens.
+- Fornecer orientações preventivas relacionadas aos incidentes.
+- Avaliar os resultados, as limitações e os riscos dos modelos utilizados.
 
 ## 🛠️ Tecnologias utilizadas
 
@@ -22,41 +23,83 @@ O objetivo é demonstrar como tecnologias de visão computacional podem contribu
 |---|---|
 | Python | Desenvolvimento da aplicação |
 | FastAPI | Construção da API REST |
-| Swagger UI | Documentação e testes da API |
-| PyTorch | Execução do modelo de IA |
-| Transformers | Carregamento e utilização do CLIP |
+| Swagger UI | Documentação e testes dos endpoints |
+| PyTorch | Execução dos modelos de inteligência artificial |
+| Hugging Face Transformers | Carregamento dos modelos |
 | CLIP | Classificação de imagens |
-| Pillow | Processamento de imagens |
-| Google Gemini | Integração experimental com IA generativa |
+| FLAN-T5 Small | Geração de texto |
+| Pillow | Leitura e validação de imagens |
+| Google Gemini | Integração experimental anterior |
 
-## 🧠 Inteligência artificial
+## 🧠 Modelos de inteligência artificial
 
-O projeto utiliza o modelo **openai/clip-vit-base-patch32**, executado localmente.
+### 1. CLIP — Visão computacional
 
-O CLIP é um modelo de visão computacional capaz de relacionar imagens e descrições textuais.
+O projeto utiliza o modelo `openai/clip-vit-base-patch32`, executado localmente.
 
-No AlertaCom-IA, cada categoria possui uma descrição textual em inglês. O modelo compara a fotografia enviada com essas descrições e seleciona a categoria com maior pontuação relativa.
+O CLIP relaciona imagens e descrições textuais. No AlertaCom-IA, ele compara a fotografia enviada com descrições em inglês associadas às categorias disponíveis.
 
-### Categorias reconhecidas
+A categoria com maior pontuação relativa é selecionada.
+
+**Categorias reconhecidas:**
 
 | Categoria | Descrição |
 |---|---|
 | `ALAGAMENTO` | Ruas alagadas |
-| `BUEIRO_OBSTRUIDO` | Bueiros obstruídos por resíduos |
+| `BUEIRO_OBSTRUIDO` | Bueiros obstruídos |
 | `ARVORE_CAIDA` | Árvores caídas em vias públicas |
 | `BURACO_NA_VIA` | Buracos no asfalto |
-| `SEM_INCIDENTE` | Ruas sem incidentes visíveis |
+| `SEM_INCIDENTE` | Ruas sem incidentes evidentes |
 
-### Funcionamento da classificação
+**Justificativa técnica:** o CLIP foi escolhido por permitir classificação de imagens com descrições textuais, utilizando um modelo previamente treinado, sem exigir treinamento de uma rede neural do zero.
 
-1. O usuário envia uma imagem para a API.
-2. O sistema verifica o arquivo recebido.
-3. A imagem é processada pelo Pillow.
-4. O modelo CLIP compara a imagem com as descrições das categorias.
-5. A categoria com maior pontuação relativa é selecionada.
-6. A API retorna o resultado em formato JSON.
+A pontuação relativa indica a preferência entre as categorias avaliadas, mas não representa uma probabilidade calibrada de acerto.
 
-**Observação:** a pontuação relativa não representa uma probabilidade calibrada de acerto. Ela indica a preferência do modelo entre as categorias disponíveis.
+### 2. FLAN-T5 Small — IA generativa
+
+O projeto também utiliza o modelo `google/flan-t5-small`, executado localmente.
+
+O FLAN-T5 é um modelo generativo de linguagem baseado na arquitetura Transformer.
+
+Após a classificação da imagem, o sistema envia ao FLAN-T5 uma descrição textual da situação identificada, solicitando a geração de uma orientação em inglês.
+
+**Justificativa técnica:** o FLAN-T5 foi escolhido para demonstrar a integração de IA generativa ao fluxo da aplicação, com execução local e sem dependência obrigatória de uma API externa.
+
+Os textos gerados são experimentais e não são considerados recomendações de segurança validadas.
+
+### 3. Orientações preventivas em português
+
+Além do texto produzido pelo FLAN-T5, a aplicação retorna uma orientação fixa em português, associada à categoria identificada.
+
+Essas orientações são mantidas separadas das respostas geradas, reduzindo a dependência de conteúdos potencialmente incorretos da IA generativa.
+
+Elas são recomendações gerais e não substituem orientações de órgãos públicos, serviços de emergência ou profissionais responsáveis.
+
+## 🏗️ Arquitetura da solução
+
+```mermaid
+flowchart TD
+    A[Usuário envia fotografia] --> B[FastAPI]
+    B --> C[Validação da imagem]
+    C --> D[CLIP - Visão computacional]
+    D --> E[Categoria identificada]
+    E --> F[FLAN-T5 - Geração de texto]
+    E --> G[Orientação preventiva fixa]
+    F --> H[Resposta JSON]
+    G --> H
+    E --> H
+    H --> I[Resultado apresentado ao usuário]
+```
+
+**Fluxo de processamento:**
+
+1. O usuário envia uma fotografia pelo endpoint `/analyze-incident`.
+2. A API verifica o tipo, tamanho e integridade do arquivo.
+3. O CLIP compara a imagem com descrições das categorias disponíveis.
+4. A categoria mais compatível é selecionada.
+5. O FLAN-T5 recebe uma descrição textual da categoria e gera uma frase em inglês.
+6. O sistema recupera a orientação preventiva fixa correspondente.
+7. A API retorna a classificação e as orientações em formato JSON.
 
 ## 🔌 Endpoints da API
 
@@ -66,9 +109,9 @@ Retorna informações básicas sobre o projeto.
 
 ### GET `/health`
 
-Verifica se a API está funcionando.
+Verifica se a API está respondendo.
 
-Exemplo de resposta:
+**Exemplo:**
 
 ```json
 {
@@ -78,51 +121,97 @@ Exemplo de resposta:
 
 ### POST `/analyze-incident`
 
-Recebe uma imagem e realiza sua classificação.
+Recebe uma fotografia e executa o fluxo de classificação e geração de texto.
 
 **Entrada:** arquivo de imagem enviado como `multipart/form-data`.
 
-**Exemplo de resposta:**
+**Limite:** 5 MB por arquivo.
+
+**Exemplo de resposta observada durante os testes:**
 
 ```json
 {
   "imagem_valida": true,
   "modo": "CLIP_LOCAL",
-  "categoria": "BURACO_NA_VIA",
-  "pontuacao_relativa": 0.9997,
-  "modelo": "openai/clip-vit-base-patch32"
+  "categoria": "ALAGAMENTO",
+  "pontuacao_relativa": 0.9977,
+  "modelo": "openai/clip-vit-base-patch32",
+  "orientacao": {
+    "orientacao_gerada": "The street is closed.",
+    "idioma_gerado": "en",
+    "orientacao_segura": "Não atravesse áreas alagadas. Procure uma rota segura.",
+    "modo": "FLAN_T5_LOCAL"
+  }
 }
 ```
 
-O exemplo representa um dos testes realizados durante o desenvolvimento.
+O campo `orientacao_gerada` contém a saída experimental da IA generativa. O campo `orientacao_segura` contém a orientação preventiva fixa em português.
 
-## 🧪 Testes realizados
+## 🧪 Testes e avaliação
 
-Foram realizados testes com cinco fotografias representando diferentes situações urbanas.
+Foram realizados testes manuais com cinco fotografias representando situações urbanas diferentes.
 
-| Teste | Categoria esperada | Resultado |
+As imagens estão armazenadas na pasta `testes/`.
+
+### Resultados da classificação
+
+| Imagem | Categoria esperada | Categoria obtida | Pontuação relativa | HTTP |
+|---|---|---|---:|---|
+| Alagamento | ALAGAMENTO | ALAGAMENTO | 0,9977 | 200 |
+| Árvore caída | ARVORE_CAIDA | ARVORE_CAIDA | 0,9995 | 200 |
+| Bueiro obstruído | BUEIRO_OBSTRUIDO | BUEIRO_OBSTRUIDO | 0,9092 | 200 |
+| Buraco na via | BURACO_NA_VIA | BURACO_NA_VIA | 0,9997 | 200 |
+| Rua normal | SEM_INCIDENTE | SEM_INCIDENTE | 0,9890 | 200 |
+
+**Resultado observado:** cinco classificações corretas em cinco imagens avaliadas.
+
+A taxa de acerto nesse pequeno conjunto foi de 100%.
+
+Esse resultado não comprova precisão geral de 100%, pois a amostra é pequena, não é representativa de todos os ambientes urbanos e foi utilizada durante o desenvolvimento.
+
+### Avaliação da IA generativa
+
+| Situação | Resposta gerada pelo FLAN-T5 | Avaliação |
 |---|---|---|
-| 1 | ALAGAMENTO | Correto |
-| 2 | SEM_INCIDENTE | Correto |
-| 3 | BUEIRO_OBSTRUIDO | Correto |
-| 4 | ARVORE_CAIDA | Correto |
-| 5 | BURACO_NA_VIA | Correto |
+| Alagamento | The street is closed. | Genérica |
+| Árvore caída | Keep your eyes open. | Pouco específica |
+| Bueiro obstruído | The drain is closed. | Descritiva |
+| Buraco na via | The pothole is a large hole. | Descritiva |
+| Rua normal | The street is closed. | Inadequada |
 
-Após a inclusão da categoria `BURACO_NA_VIA`, os cinco testes foram repetidos e apresentaram as classificações esperadas.
+O FLAN-T5 gerou texto legível nas cinco requisições, mas não produziu recomendações preventivas suficientemente específicas.
 
-**Resultado observado: 5 classificações corretas em 5 imagens testadas.**
+No teste com a rua normal, o modelo gerou uma afirmação inadequada, demonstrando o risco de respostas incorretas.
 
-Esse resultado corresponde apenas ao conjunto de imagens utilizado durante os testes e não comprova a precisão geral do modelo.
+**Conclusão da avaliação:** a integração técnica entre visão computacional e IA generativa está funcionando, mas a qualidade das orientações geradas precisa ser aprimorada antes de qualquer utilização prática.
+
+### Critérios de avaliação
+
+Foram considerados:
+
+- Correspondência entre a categoria esperada e a categoria identificada.
+- Retorno HTTP 200 nas requisições válidas.
+- Presença dos campos esperados no JSON.
+- Execução da geração de texto pelo FLAN-T5.
+- Pertinência e utilidade das respostas geradas.
+- Identificação de limitações e possíveis respostas inadequadas.
 
 ## ▶️ Como executar o projeto
 
-### 1. Criar o ambiente virtual
+### 1. Clonar o repositório
+
+```bash
+git clone https://github.com/matheus-molina/AlertaCom-IA.git
+cd AlertaCom-IA
+```
+
+### 2. Criar o ambiente virtual
 
 ```bash
 python -m venv .venv
 ```
 
-### 2. Ativar o ambiente virtual
+### 3. Ativar o ambiente virtual
 
 No Windows PowerShell:
 
@@ -130,27 +219,27 @@ No Windows PowerShell:
 .\.venv\Scripts\Activate.ps1
 ```
 
-### 3. Instalar as dependências
+### 4. Instalar as dependências
 
 ```bash
 python -m pip install -r requirements.txt
 ```
 
-### 4. Iniciar o servidor
+### 5. Iniciar o servidor
 
 ```bash
 python -m uvicorn src.main:app --reload
 ```
 
-### 5. Acessar o Swagger
+### 6. Acessar o Swagger
 
 Abra no navegador:
 
-`http://127.0.0.1:8000/docs`
+http://127.0.0.1:8000/docs
 
-Selecione o endpoint `POST /analyze-incident`, envie uma fotografia e execute a análise.
+Selecione `POST /analyze-incident`, clique em **Try it out**, envie uma fotografia e execute a análise.
 
-Na primeira execução, o modelo CLIP poderá precisar baixar seus arquivos, exigindo conexão com a internet.
+**Observação:** na primeira execução, os modelos CLIP e FLAN-T5 podem precisar baixar arquivos do Hugging Face. É necessária conexão com a internet para esse download inicial. O processamento local também exige memória e recursos computacionais compatíveis.
 
 ## 📁 Estrutura do projeto
 
@@ -159,10 +248,16 @@ AlertaCom-IA/
 ├── src/
 │   ├── main.py
 │   ├── vision_classifier.py
-│   └── clip_classifier.py
+│   ├── clip_classifier.py
+│   └── generative_advisor.py
 ├── testes/
-│   └── alagamento.jpeg
+│   ├── alagamento.jpeg
+│   ├── arvore.jpeg
+│   ├── Bueiro obstruído.jpeg
+│   ├── Buraco na rua.webp
+│   └── Rua normal.avif
 ├── teste_clip.py
+├── teste_flan.py
 ├── teste_gemini.py
 ├── requirements.txt
 ├── README.md
@@ -170,33 +265,53 @@ AlertaCom-IA/
 └── .env
 ```
 
-O arquivo `.env` contém configurações locais e não deve ser enviado ao repositório.
+O arquivo `.env` contém configurações locais e não deve ser enviado ao repositório. O ambiente `.venv` também não deve ser versionado.
 
-## ⚠️ Limitações atuais
+## ⚠️ Limitações e responsabilidade
 
-- O modelo CLIP realiza classificações entre categorias previamente definidas.
-- A classificação depende das descrições textuais utilizadas.
-- A pontuação relativa não representa uma garantia de acerto.
-- O sistema ainda não realiza avaliação automática da gravidade dos incidentes.
-- A análise de uma fotografia isolada não é suficiente para determinar se uma área é segura.
-- São necessários testes com um conjunto maior e mais diversificado de imagens para avaliar o desempenho real da solução.
+- O CLIP classifica imagens apenas entre as categorias configuradas.
+- As pontuações relativas não são probabilidades calibradas.
+- A análise depende das descrições textuais utilizadas.
+- O conjunto de testes é pequeno e não representa a diversidade de cenários reais.
+- O FLAN-T5 pode gerar frases genéricas, incorretas ou inadequadas.
+- A saída generativa não é validada automaticamente.
+- O sistema não determina a gravidade dos incidentes.
+- Uma fotografia isolada não permite garantir a segurança de uma área.
+- O projeto é um protótipo acadêmico e não deve ser utilizado como sistema oficial de emergência.
+- Fotografias podem conter pessoas, placas e outras informações sensíveis; recomenda-se evitar o envio de imagens com dados pessoais desnecessários.
 
-### Integração com Gemini
+## 🔬 Experimentos com Google Gemini
 
-O projeto também explorou a integração com a API do Google Gemini.
+Durante o desenvolvimento, também foi explorada a integração com a API Google Gemini.
 
-Durante os testes, foram encontrados erros de timeout (`504 DEADLINE_EXCEEDED`).
+Nos testes, ocorreram erros de timeout `504 DEADLINE_EXCEEDED`, impedindo a utilização consistente dessa integração.
 
-Como alternativa, foi implementado o classificador local CLIP, permitindo realizar classificações sem depender da geração de conteúdo pelo Gemini.
+Como alternativa, foram adotados modelos executados localmente:
 
-O projeto mantém uma resposta de demonstração para situações em que a análise pelo Gemini não é concluída. Essa resposta não representa uma classificação realizada pela IA.
+- CLIP, para classificação visual.
+- FLAN-T5 Small, para geração de texto.
 
-## 🔐 Segurança
+O arquivo experimental de integração com Gemini foi mantido para fins de estudo e documentação das tentativas realizadas.
 
-As credenciais de acesso à API Gemini são armazenadas localmente no arquivo `.env`.
+## 🔐 Segurança e reprodutibilidade
 
-Esse arquivo deve permanecer excluído do versionamento por meio do `.gitignore`.
+- Credenciais de API devem permanecer em variáveis de ambiente.
+- O arquivo `.env` não deve ser versionado.
+- A pasta `.venv` deve permanecer fora do repositório.
+- As dependências devem estar registradas no `requirements.txt`.
+- Os modelos utilizados são identificados pelos respectivos nomes.
+- A API valida o formato, a integridade e o tamanho dos arquivos recebidos.
 
 ## 🎓 Contexto acadêmico
 
-Projeto desenvolvido como parte das atividades acadêmicas da **FIAP**, com foco na aplicação de inteligência artificial, desenvolvimento de software e visão computacional para identificação de incidentes urbanos.
+Projeto desenvolvido para a **Global Solution da FIAP**, no contexto da proposta **CitizenTech**, com foco na utilização de inteligência artificial para problemas urbanos.
+
+**Instituição:** FIAP
+
+**Curso:** Análise e Desenvolvimento de Sistemas
+
+**Turma:** 2TDSR
+
+**Integrantes:** preencher com os nomes completos e RMs de todos os participantes antes da entrega.
+
+**Repositório:** https://github.com/matheus-molina/AlertaCom-IA
