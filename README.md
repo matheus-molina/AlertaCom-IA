@@ -1,3 +1,4 @@
+
 # 🚨 AlertaCom-IA
 
 ## 📌 Sobre o projeto
@@ -298,7 +299,7 @@ O arquivo experimental de integração com Gemini foi mantido para fins de estud
 - Credenciais de API devem permanecer em variáveis de ambiente.
 - O arquivo `.env` não deve ser versionado.
 - A pasta `.venv` deve permanecer fora do repositório.
-- As dependências devem estar registradas no `requirements.txt`.
+- As dependências estão registradas no `requirements.txt`.
 - Os modelos utilizados são identificados pelos respectivos nomes.
 - A API valida o formato, a integridade e o tamanho dos arquivos recebidos.
 
@@ -312,6 +313,19 @@ Projeto desenvolvido para a **Global Solution da FIAP**, no contexto da proposta
 
 **Turma:** 2TDSR
 
-**Integrantes:** preencher com os nomes completos e RMs de todos os participantes antes da entrega.
+### 👥 Integrantes
 
-**Repositório:** https://github.com/matheus-molina/AlertaCom-IA
+| Nome completo | RM |
+|---|---|
+| Vitória Rodrigues Martins | RM565160 |
+| Thomas Fontes | RM562254 |
+| Gabriel Maciel | RM562795 |
+| Matheus Pereira Molina | RM563399 |
+
+### 🔗 Repositório
+
+https://github.com/matheus-molina/AlertaCom-IA
+
+---
+
+**AlertaCom-IA — Inteligência artificial aplicada à identificação de incidentes urbanos.**
